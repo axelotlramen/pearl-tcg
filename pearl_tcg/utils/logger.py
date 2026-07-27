@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 import logging.handlers
 import sys
+from pathlib import Path
 
 import coloredlogs
 
@@ -31,6 +32,7 @@ def setup_logging() -> None:
         log.addHandler(console_handler)
 
     # File handler
+    Path("logs").mkdir(parents=True, exist_ok=True)
     file_handler = logging.handlers.RotatingFileHandler(
         filename="logs/bot_activity.log",
         encoding="utf-8",
