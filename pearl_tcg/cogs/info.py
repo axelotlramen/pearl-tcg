@@ -6,11 +6,11 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from durin_tcg.bot import DurinBot
-from durin_tcg.l10n import LocaleStr
+from pearl_tcg.bot import PearlBot
+from pearl_tcg.l10n import LocaleStr
 
 if TYPE_CHECKING:
-    from durin_tcg.bot import DurinBot
+    from pearl_tcg.bot import PearlBot
 
 
 class Info(commands.Cog):
@@ -32,6 +32,6 @@ class Info(commands.Cog):
         await interaction.response.send_message(embed=embed)
 
 
-async def setup(bot: DurinBot) -> None:
+async def setup(bot: PearlBot) -> None:
     bot.remove_command("help")
     await bot.add_cog(Info(bot))

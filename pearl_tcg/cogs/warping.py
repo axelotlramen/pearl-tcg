@@ -7,11 +7,11 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from durin_tcg.bot import DurinBot
+from pearl_tcg.bot import PearlBot
 
 if TYPE_CHECKING:
-    from durin_tcg.bot import DurinBot
-    from durin_tcg.models.game_data import GameData
+    from pearl_tcg.bot import PearlBot
+    from pearl_tcg.models.game_data import GameData
 
 
 class Warping(commands.GroupCog, name="warp"):
@@ -66,5 +66,5 @@ class Warping(commands.GroupCog, name="warp"):
         await interaction.followup.send(embed=embed)
 
 
-async def setup(bot: DurinBot) -> None:
+async def setup(bot: PearlBot) -> None:
     await bot.add_cog(Warping(bot, bot.game_data))

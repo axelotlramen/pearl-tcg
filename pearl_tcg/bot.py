@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING
 import discord
 from discord.ext import commands, tasks
 
-from durin_tcg.models.game_data import GameData
+from pearl_tcg.models.game_data import GameData
 
 from .utils.logger import LOGGER
 
@@ -20,7 +20,7 @@ if TYPE_CHECKING:
     from discord.ext.commands import Context
 
 
-class DurinBot(commands.Bot):
+class PearlBot(commands.Bot):
     def __init__(self) -> None:
         super().__init__(command_prefix="a!", intents=discord.Intents.all(), help_command=None)
 
@@ -29,11 +29,11 @@ class DurinBot(commands.Bot):
         self.game_data = GameData()
 
     async def _load_cogs(self) -> None:
-        for filepath in Path("durin_tcg/cogs").glob("**/*.py"):
+        for filepath in Path("pearl_tcg/cogs").glob("**/*.py"):
             extension = Path(filepath).stem
 
             try:
-                await self.load_extension(f"durin_tcg.cogs.{extension}")
+                await self.load_extension(f"pearl_tcg.cogs.{extension}")
                 self.logger.info("Loaded extension '%s'", extension)
             except Exception as e:
                 exception = f"{type(e).__name__}: {e}"

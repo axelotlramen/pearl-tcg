@@ -2,20 +2,20 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Literal
 
-from durin_tcg.constants import (
+from pearl_tcg.constants import (
     CARD_BASIC_ATTACK,
     CARD_ELEMENT_TO_DAMAGE_TYPE,
     CARD_SKILL_ATTACK,
     CARD_ULTIMATE_ATTACK,
 )
-from durin_tcg.enums import CardDamageType, Game
-from durin_tcg.exceptions import InvalidAbilityUseError
+from pearl_tcg.enums import CardDamageType, Game
+from pearl_tcg.exceptions import InvalidAbilityUseError
 
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-    from durin_tcg.enums import CardElement
-    from durin_tcg.models.game import Character, Player
+    from pearl_tcg.enums import CardElement
+    from pearl_tcg.models.game import Character, Player
 
 
 class Ability:

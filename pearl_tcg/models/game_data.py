@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from durin_tcg.models.user import TCGUser
-from durin_tcg.utils.reading_cards import read_cards
-from durin_tcg.utils.reading_users import load_all_users, save_all_users
+from pearl_tcg.models.user import TCGUser
+from pearl_tcg.utils.reading_cards import read_cards
+from pearl_tcg.utils.reading_users import load_all_users, save_all_users
 
 
 class GameData:

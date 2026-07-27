@@ -1,17 +1,17 @@
-<h1 align="center"> Durin TCG </h1>
+<h1 align="center"> Pearl TCG </h1>
 
 [![Invite](https://img.shields.io/badge/Add%20the%20bot-%235865F2.svg?style=for-the-badge&logo=discord&logoColor=white)](https://discord.com/oauth2/authorize?client_id=1296536262446026794&permissions=2151017472&integration_type=0&scope=applications.commands+bot)
 
-![Durin TCG](https://github.com/user-attachments/assets/f564fae9-8706-453f-88e1-b1d1e501c1ca)
+![Pearl TCG](https://github.com/user-attachments/assets/f564fae9-8706-453f-88e1-b1d1e501c1ca)
 
-![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/axelotlramen/durin-tcg)
-![Lines of code](https://tokei.rs/b1/github/axelotlramen/durin-tcg?style=flat&category=code&type=Python)
-![Commit activity](https://img.shields.io/github/commit-activity/w/axelotlramen/durin-tcg/main)
-![GitHub](https://img.shields.io/github/license/axelotlramen/durin-tcg)
+![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/axelotlramen/pearl-tcg)
+![Lines of code](https://tokei.rs/b1/github/axelotlramen/pearl-tcg?style=flat&category=code&type=Python)
+![Commit activity](https://img.shields.io/github/commit-activity/w/axelotlramen/pearl-tcg/main)
+![GitHub](https://img.shields.io/github/license/axelotlramen/pearl-tcg)
 
-### What is Durin?
+### What is Pearl?
 
-Durin was created because I really love the Genius Invocation TCG in Genshin Impact, and I also love Honkai: Star Rail and Zenless Zone Zero characters, so I decided to try to turn those characters into similar cards.
+Pearl was created because I really love the Genius Invocation TCG in Genshin Impact, and I also love Honkai: Star Rail and Zenless Zone Zero characters, so I decided to try to turn those characters into similar cards.
 
 ## License
 

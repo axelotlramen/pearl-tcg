@@ -6,12 +6,12 @@ import discord
 from discord import Interaction, SelectOption
 from discord.ui import Modal, Select, TextInput, View
 
-from durin_tcg.constants import EMBED_TIMEOUT
-from durin_tcg.models.user import CardDeck
-from durin_tcg.views.base import BaseView
+from pearl_tcg.constants import EMBED_TIMEOUT
+from pearl_tcg.models.user import CardDeck
+from pearl_tcg.views.base import BaseView
 
 if TYPE_CHECKING:
-    from durin_tcg.models.game_data import GameData
+    from pearl_tcg.models.game_data import GameData
 
 
 class DeckAddView(BaseView):

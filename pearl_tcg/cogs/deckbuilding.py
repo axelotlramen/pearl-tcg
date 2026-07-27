@@ -6,17 +6,17 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from durin_tcg.views.decks.deck_add_view import DeckAddView
-from durin_tcg.views.decks.deck_delete_view import DeleteDeckView
-from durin_tcg.views.decks.deck_edit_view import EditDeckView
+from pearl_tcg.views.decks.deck_add_view import DeckAddView
+from pearl_tcg.views.decks.deck_delete_view import DeleteDeckView
+from pearl_tcg.views.decks.deck_edit_view import EditDeckView
 
 if TYPE_CHECKING:
-    from durin_tcg.bot import DurinBot
-    from durin_tcg.models.game_data import GameData
+    from pearl_tcg.bot import PearlBot
+    from pearl_tcg.models.game_data import GameData
 
 
 class Deckbuilding(commands.GroupCog, name="decks"):
-    def __init__(self, bot: DurinBot, game_data: GameData) -> None:
+    def __init__(self, bot: PearlBot, game_data: GameData) -> None:
         self.bot = bot
         self.game_data = game_data
 
@@ -113,5 +113,5 @@ class Deckbuilding(commands.GroupCog, name="decks"):
         await interaction.response.send_message("Select a deck to edit:", view=view)
 
 
-async def setup(bot: DurinBot) -> None:
+async def setup(bot: PearlBot) -> None:
     await bot.add_cog(Deckbuilding(bot, bot.game_data))

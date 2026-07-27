@@ -6,11 +6,11 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from durin_tcg.commands.battling import BattleCommand
+from pearl_tcg.commands.battling import BattleCommand
 
 if TYPE_CHECKING:
-    from durin_tcg.bot import DurinBot
-    from durin_tcg.models.game_data import GameData
+    from pearl_tcg.bot import PearlBot
+    from pearl_tcg.models.game_data import GameData
 
 
 class Battling(commands.GroupCog, name="battle"):
@@ -49,5 +49,5 @@ class Battling(commands.GroupCog, name="battle"):
         await command.send_invite(interaction)
 
 
-async def setup(bot: DurinBot) -> None:
+async def setup(bot: PearlBot) -> None:
     await bot.add_cog(Battling(bot, bot.game_data))

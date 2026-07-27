@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from durin_tcg.enums import CardDamageType, CardElement
+from pearl_tcg.enums import CardDamageType, CardElement
 
 EMBED_TIMEOUT = 60
 TURN_TIME_LIMIT = 15

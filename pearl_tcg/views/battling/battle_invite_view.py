@@ -6,13 +6,13 @@ import discord
 from discord import Embed, Interaction
 from discord.ui import Button
 
-from durin_tcg.constants import EMBED_TIMEOUT
-from durin_tcg.views.base import BaseView
-from durin_tcg.views.battling.switch_deck_view import SwitchDeckView
+from pearl_tcg.constants import EMBED_TIMEOUT
+from pearl_tcg.views.base import BaseView
+from pearl_tcg.views.battling.switch_deck_view import SwitchDeckView
 
 if TYPE_CHECKING:
-    from durin_tcg.commands.battling import BattleCommand
-    from durin_tcg.models.user import CardDeck
+    from pearl_tcg.commands.battling import BattleCommand
+    from pearl_tcg.models.user import CardDeck
 
 
 class BattleInviteView(BaseView):

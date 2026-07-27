@@ -7,11 +7,11 @@ from discord import Interaction, app_commands
 from discord.ext import commands
 from discord.ext.commands import Context
 
-from durin_tcg.bot import DurinBot
-from durin_tcg.l10n import LocaleStr
+from pearl_tcg.bot import PearlBot
+from pearl_tcg.l10n import LocaleStr
 
 if TYPE_CHECKING:
-    from durin_tcg.bot import DurinBot
+    from pearl_tcg.bot import PearlBot
 
 LOCALE_NAME_MAP = {loc.value: loc for loc in discord.Locale}
 
@@ -46,6 +46,6 @@ class Admin(commands.Cog):
         )
 
 
-async def setup(bot: DurinBot) -> None:
+async def setup(bot: PearlBot) -> None:
     bot.remove_command("help")
     await bot.add_cog(Admin(bot))

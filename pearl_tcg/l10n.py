@@ -6,7 +6,7 @@ from typing import Any
 import yaml
 from discord import Locale
 
-from durin_tcg.utils.logger import LOGGER
+from pearl_tcg.utils.logger import LOGGER
 
 L10N_PATH = pathlib.Path("./l10n")
 DEFAULT_LANG = "en_US"

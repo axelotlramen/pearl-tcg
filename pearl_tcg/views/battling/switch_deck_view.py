@@ -7,14 +7,14 @@ import discord
 from discord import Embed, Interaction
 from discord.ui import Button, Select
 
-from durin_tcg.constants import EMBED_TIMEOUT
-from durin_tcg.views.base import BaseView
+from pearl_tcg.constants import EMBED_TIMEOUT
+from pearl_tcg.views.base import BaseView
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Coroutine
 
-    from durin_tcg.commands.battling import BattleCommand
-    from durin_tcg.models.user import CardDeck
+    from pearl_tcg.commands.battling import BattleCommand
+    from pearl_tcg.models.user import CardDeck
 
 
 class SwitchDeckView(BaseView):

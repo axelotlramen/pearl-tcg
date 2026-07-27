@@ -7,13 +7,13 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from durin_tcg.enums import Game
-from durin_tcg.models.cards import Card
-from durin_tcg.views.card_album_view import CardAlbumPaginator
+from pearl_tcg.enums import Game
+from pearl_tcg.models.cards import Card
+from pearl_tcg.views.card_album_view import CardAlbumPaginator
 
 if TYPE_CHECKING:
-    from durin_tcg.bot import DurinBot
-    from durin_tcg.models.game_data import GameData
+    from pearl_tcg.bot import PearlBot
+    from pearl_tcg.models.game_data import GameData
 
 
 class CardGame(commands.GroupCog, name="cards"):
@@ -96,5 +96,5 @@ class CardGame(commands.GroupCog, name="cards"):
         await interaction.response.send_message(embed=view._get_embed(), view=view)
 
 
-async def setup(bot: DurinBot) -> None:
+async def setup(bot: PearlBot) -> None:
     await bot.add_cog(CardGame(bot, bot.game_data))

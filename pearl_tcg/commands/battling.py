@@ -4,12 +4,12 @@ from typing import TYPE_CHECKING, Literal
 
 import discord
 
-from durin_tcg.models.game import AIPlayer, Battle, Character, Player
-from durin_tcg.views.battling.battle_invite_view import BattleInviteView
-from durin_tcg.views.battling.battle_views import AIBattleView, BattleView, PlayerBattleView
+from pearl_tcg.models.game import AIPlayer, Battle, Character, Player
+from pearl_tcg.views.battling.battle_invite_view import BattleInviteView
+from pearl_tcg.views.battling.battle_views import AIBattleView, BattleView, PlayerBattleView
 
 if TYPE_CHECKING:
-    from durin_tcg.models.game_data import GameData
+    from pearl_tcg.models.game_data import GameData
 
 
 class BattleCommand:
