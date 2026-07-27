@@ -2,19 +2,19 @@ from __future__ import annotations
 
 import asyncio
 import contextlib
-from abc import ABC, abstractmethod
+from abc import ABC
 from typing import TYPE_CHECKING, Literal
 
 import discord
 from discord.ui import Button
 
-from durin_tcg.constants import EMBED_TIMEOUT, TURN_TIME_LIMIT
-from durin_tcg.enums import CardAbility
-from durin_tcg.views.base import BaseView
+from pearl_tcg.constants import EMBED_TIMEOUT, TURN_TIME_LIMIT
+from pearl_tcg.enums import CardAbility
+from pearl_tcg.views.base import BaseView
 
 if TYPE_CHECKING:
-    from durin_tcg.models.game import Battle, Player
-    from durin_tcg.models.game_data import GameData
+    from pearl_tcg.models.game import Battle, Player
+    from pearl_tcg.models.game_data import GameData
 
 
 class BattleView(BaseView, ABC):

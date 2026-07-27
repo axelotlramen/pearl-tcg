@@ -1,7 +1,11 @@
 from __future__ import annotations
 
-import discord
-from discord.ui import View
+from typing import TYPE_CHECKING
+
+from discord.ui import Button, Select, View
+
+if TYPE_CHECKING:
+    import discord
 
 
 class BaseView(View):
@@ -11,4 +15,5 @@ class BaseView(View):
 
     async def on_timeout(self) -> None:
         for child in self.children:
-            child.disabled = True
+            if isinstance(child, (Button, Select)):
+                child.disabled = True

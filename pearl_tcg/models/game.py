@@ -4,11 +4,11 @@ import random
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
-from durin_tcg.constants import CARD_BASE_HP
-from durin_tcg.enums import CardAbility, CardDamageType, CardElement
+from pearl_tcg.constants import CARD_BASE_HP
+from pearl_tcg.enums import CardAbility, CardDamageType
 
 if TYPE_CHECKING:
-    from durin_tcg.models.cards import Card
+    from pearl_tcg.models.cards import Card
 
 
 class Character:
