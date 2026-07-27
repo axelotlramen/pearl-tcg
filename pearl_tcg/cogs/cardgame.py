@@ -7,7 +7,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from pearl_tcg.enums import Game
+from pearl_tcg.enums import Path
 from pearl_tcg.models.cards import Card
 from pearl_tcg.views.card_album_view import CardAlbumPaginator
 
@@ -30,7 +30,7 @@ class CardGame(commands.GroupCog, name="cards"):
         if uid not in self.game_data.users:
             self.game_data.add_user(uid)
             await interaction.followup.send(
-                "You don't own any cards yet, but your Durin TCG account has been created. Please use `/warp` to get some cards."
+                "You don't own any cards yet, but your Pearl TCG account has been created. Cards will be claimable soon."
             )
             return
 
@@ -38,7 +38,7 @@ class CardGame(commands.GroupCog, name="cards"):
 
         if not user.owned_cards:
             await interaction.followup.send(
-                "You don't own any cards yet. Please use `/warp` or wait for `@axelotlramen` to implement this feature."
+                "You don't own any cards yet. Cards will be claimable soon."
             )
             return
 
@@ -58,9 +58,9 @@ class CardGame(commands.GroupCog, name="cards"):
             await interaction.response.send_message("No cards found.", ephemeral=True)
             return
 
-        cards_by_game: dict[Game, list[Card]] = defaultdict(list)
+        cards_by_path: dict[Path, list[Card]] = defaultdict(list)
         for card in cards.values():
-            cards_by_game[card.game].append(card)
+            cards_by_path[card.path].append(card)
 
         embed = discord.Embed(
             title="All Available Cards",
@@ -68,12 +68,12 @@ class CardGame(commands.GroupCog, name="cards"):
             color=discord.Color.blurple(),
         )
 
-        for game in sorted(cards_by_game.keys()):
+        for path in sorted(cards_by_path.keys()):
             card_lines = [
                 f"• **{card.name}** — {card.element.value}"
-                for card in sorted(cards_by_game[game], key=lambda c: c.name)
+                for card in sorted(cards_by_path[path], key=lambda c: c.name)
             ]
-            embed.add_field(name=f"{game.value} Cards", value="\n".join(card_lines), inline=False)
+            embed.add_field(name=f"{path.value} Cards", value="\n".join(card_lines), inline=False)
 
         await interaction.response.send_message(embed=embed)
 
@@ -88,7 +88,7 @@ class CardGame(commands.GroupCog, name="cards"):
 
         if not user or not user.owned_cards:
             await interaction.response.send_message(
-                "You don't own any cards yet. Please use `/warp` or wait for `@axelotlramen` to implement this feature."
+                "You don't own any cards yet. Cards will be claimable soon."
             )
             return
 

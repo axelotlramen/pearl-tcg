@@ -24,7 +24,12 @@ class CardAlbumPaginator(View):
         current_card = self.card_lookup[self.user_cards[self.index]]
 
         embed = discord.Embed(
-            title=current_card.name, description=f"Card {self.index + 1}/{len(self.user_cards)}"
+            title=current_card.name,
+            description=(
+                f"Card {self.index + 1}/{len(self.user_cards)}\n"
+                f"{current_card.path.value} - {current_card.element.value} - "
+                f"{current_card.rarity.value}"
+            ),
         )
 
         embed.add_field(name="Basic Attack", value=current_card.basic.desc, inline=False)

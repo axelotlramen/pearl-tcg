@@ -1,118 +1,327 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal
-
-from pearl_tcg.constants import (
-    CARD_BASIC_ATTACK,
-    CARD_ELEMENT_TO_DAMAGE_TYPE,
-    CARD_SKILL_ATTACK,
-    CARD_ULTIMATE_ATTACK,
-)
-from pearl_tcg.enums import CardDamageType, Game
-from pearl_tcg.exceptions import InvalidAbilityUseError
-
-if TYPE_CHECKING:
-    from collections.abc import Callable
-
-    from pearl_tcg.enums import CardElement
-    from pearl_tcg.models.game import Character, Player
+from pearl_tcg.enums import Element, Path, Rarity
 
 
 class Ability:
-    def __init__(
-        self,
-        name: str,
-        desc: str,
-        damage_type: CardDamageType,
-        damage_number: int,
-        add_func: Callable[[list[Character], Player], None] | None = None,
-        ability_type: Literal["attack", "buff"] = "attack",
-    ) -> None:
+    def __init__(self, name: str, desc: str) -> None:
         self.name = name
         self.desc = desc
-        self.damage_type = damage_type
-        self.damage_number = damage_number
 
-        self.add_func = add_func
-        self.ability_type = ability_type
-
-    def default_attack(self, _allies: list[Character], enemy: Player) -> None:
-        enemy_active = enemy.active_character
-        damage = self.damage_number
-        enemy_active.afflict_element(self.damage_type)
-
-        if enemy_active.current_shield > 0:
-            if damage <= enemy_active.current_shield:
-                enemy_active.current_shield -= damage
-                damage = 0
-            else:
-                damage -= enemy_active.current_shield
-                enemy_active.current_shield = 0
-
-        enemy_active.current_hp = max(enemy_active.current_hp - damage, 0)
-
-    def default_buff(self, allies: list[Character], _enemy: Player) -> None:
-        live_allies = [a for a in allies if a.final_hp > 0]
-        if not live_allies:
-            msg = f"No valid ally targets for skill: {self.name}"
-            raise InvalidAbilityUseError(msg)
-
-        msg = "Buffs/Healing not implemented yet."
-        raise NotImplementedError(msg)
-
-    def use(self, allies: list[Character], enemy: Player) -> None:
-        if self.ability_type == "attack":
-            self.default_attack(allies, enemy)
-        else:
-            self.default_buff(allies, enemy)
+    def __repr__(self) -> str:
+        return f"{self.name}: {self.desc}"
 
 
 class Card:
-    # Set up the card object
-    def __init__(self, name: str, desc: str, game: Game, element: CardElement) -> None:
+    def __init__(
+        self,
+        name: str,
+        path: Path,
+        element: Element,
+        rarity: Rarity,
+        base_atk: int,
+        base_def: int,
+        base_spd: int,
+        crit_rate: float,
+        crit_dmg: float,
+        basic: Ability,
+        skill: Ability,
+        ultimate: Ability,
+    ) -> None:
         self.name = name
-        self.desc = desc
-        self.game = game
+        self.path = path
         self.element = element
-
-        card_damage_type = CARD_ELEMENT_TO_DAMAGE_TYPE[self.element]
-
-        self.basic = Ability(
-            name=f"{self.name} Basic",
-            desc=f"{self.name} strikes an enemy.",
-            damage_type=card_damage_type,
-            damage_number=CARD_BASIC_ATTACK,
-        )
-        self.skill = Ability(
-            name=f"{self.name} Skill",
-            desc=f"{self.name} uses their unique ability.",
-            damage_type=card_damage_type,
-            damage_number=CARD_SKILL_ATTACK,
-        )
-        self.ultimate = Ability(
-            name=f"{self.name} Ultimate",
-            desc=f"{self.name} unleashes a devastating ultimate attack.",
-            damage_type=card_damage_type,
-            damage_number=CARD_ULTIMATE_ATTACK,
-        )
+        self.rarity = rarity
+        self.base_atk = base_atk
+        self.base_def = base_def
+        self.base_spd = base_spd
+        self.crit_rate = crit_rate
+        self.crit_dmg = crit_dmg
+        self.basic = basic
+        self.skill = skill
+        self.ultimate = ultimate
 
     def __repr__(self) -> str:
-        return "**" + self.name + "* : " + self.desc
+        return f"**{self.name}** ({self.path.value} - {self.element.value})"
 
     def __str__(self) -> str:
-        return "**" + self.name + "* : " + self.desc
+        return self.__repr__()
 
 
-class GenshinCard(Card):
-    def __init__(self, name: str, desc: str, element: CardElement) -> None:
-        super().__init__(name, desc, Game.GENSHIN, element)
+class DestructionCard(Card):
+    def __init__(
+        self,
+        name: str,
+        element: Element,
+        rarity: Rarity,
+        base_atk: int,
+        base_def: int,
+        base_spd: int,
+        crit_rate: float,
+        crit_dmg: float,
+        basic: Ability,
+        skill: Ability,
+        ultimate: Ability,
+    ) -> None:
+        super().__init__(
+            name=name,
+            path=Path.DESTRUCTION,
+            element=element,
+            rarity=rarity,
+            base_atk=base_atk,
+            base_def=base_def,
+            base_spd=base_spd,
+            crit_rate=crit_rate,
+            crit_dmg=crit_dmg,
+            basic=basic,
+            skill=skill,
+            ultimate=ultimate,
+        )
 
 
-class HSRCard(Card):
-    def __init__(self, name: str, desc: str, element: CardElement) -> None:
-        super().__init__(name, desc, Game.HSR, element)
+class HuntCard(Card):
+    def __init__(
+        self,
+        name: str,
+        element: Element,
+        rarity: Rarity,
+        base_atk: int,
+        base_def: int,
+        base_spd: int,
+        crit_rate: float,
+        crit_dmg: float,
+        basic: Ability,
+        skill: Ability,
+        ultimate: Ability,
+    ) -> None:
+        super().__init__(
+            name=name,
+            path=Path.HUNT,
+            element=element,
+            rarity=rarity,
+            base_atk=base_atk,
+            base_def=base_def,
+            base_spd=base_spd,
+            crit_rate=crit_rate,
+            crit_dmg=crit_dmg,
+            basic=basic,
+            skill=skill,
+            ultimate=ultimate,
+        )
 
 
-class ZZZCard(Card):
-    def __init__(self, name: str, desc: str, element: CardElement) -> None:
-        super().__init__(name, desc, Game.ZZZ, element)
+class EruditionCard(Card):
+    def __init__(
+        self,
+        name: str,
+        element: Element,
+        rarity: Rarity,
+        base_atk: int,
+        base_def: int,
+        base_spd: int,
+        crit_rate: float,
+        crit_dmg: float,
+        basic: Ability,
+        skill: Ability,
+        ultimate: Ability,
+    ) -> None:
+        super().__init__(
+            name=name,
+            path=Path.ERUDITION,
+            element=element,
+            rarity=rarity,
+            base_atk=base_atk,
+            base_def=base_def,
+            base_spd=base_spd,
+            crit_rate=crit_rate,
+            crit_dmg=crit_dmg,
+            basic=basic,
+            skill=skill,
+            ultimate=ultimate,
+        )
+
+
+class HarmonyCard(Card):
+    def __init__(
+        self,
+        name: str,
+        element: Element,
+        rarity: Rarity,
+        base_atk: int,
+        base_def: int,
+        base_spd: int,
+        crit_rate: float,
+        crit_dmg: float,
+        basic: Ability,
+        skill: Ability,
+        ultimate: Ability,
+    ) -> None:
+        super().__init__(
+            name=name,
+            path=Path.HARMONY,
+            element=element,
+            rarity=rarity,
+            base_atk=base_atk,
+            base_def=base_def,
+            base_spd=base_spd,
+            crit_rate=crit_rate,
+            crit_dmg=crit_dmg,
+            basic=basic,
+            skill=skill,
+            ultimate=ultimate,
+        )
+
+
+class NihilityCard(Card):
+    def __init__(
+        self,
+        name: str,
+        element: Element,
+        rarity: Rarity,
+        base_atk: int,
+        base_def: int,
+        base_spd: int,
+        crit_rate: float,
+        crit_dmg: float,
+        basic: Ability,
+        skill: Ability,
+        ultimate: Ability,
+    ) -> None:
+        super().__init__(
+            name=name,
+            path=Path.NIHILITY,
+            element=element,
+            rarity=rarity,
+            base_atk=base_atk,
+            base_def=base_def,
+            base_spd=base_spd,
+            crit_rate=crit_rate,
+            crit_dmg=crit_dmg,
+            basic=basic,
+            skill=skill,
+            ultimate=ultimate,
+        )
+
+
+class PreservationCard(Card):
+    def __init__(
+        self,
+        name: str,
+        element: Element,
+        rarity: Rarity,
+        base_atk: int,
+        base_def: int,
+        base_spd: int,
+        crit_rate: float,
+        crit_dmg: float,
+        basic: Ability,
+        skill: Ability,
+        ultimate: Ability,
+    ) -> None:
+        super().__init__(
+            name=name,
+            path=Path.PRESERVATION,
+            element=element,
+            rarity=rarity,
+            base_atk=base_atk,
+            base_def=base_def,
+            base_spd=base_spd,
+            crit_rate=crit_rate,
+            crit_dmg=crit_dmg,
+            basic=basic,
+            skill=skill,
+            ultimate=ultimate,
+        )
+
+
+class AbundanceCard(Card):
+    def __init__(
+        self,
+        name: str,
+        element: Element,
+        rarity: Rarity,
+        base_atk: int,
+        base_def: int,
+        base_spd: int,
+        crit_rate: float,
+        crit_dmg: float,
+        basic: Ability,
+        skill: Ability,
+        ultimate: Ability,
+    ) -> None:
+        super().__init__(
+            name=name,
+            path=Path.ABUNDANCE,
+            element=element,
+            rarity=rarity,
+            base_atk=base_atk,
+            base_def=base_def,
+            base_spd=base_spd,
+            crit_rate=crit_rate,
+            crit_dmg=crit_dmg,
+            basic=basic,
+            skill=skill,
+            ultimate=ultimate,
+        )
+
+
+class RemembranceCard(Card):
+    def __init__(
+        self,
+        name: str,
+        element: Element,
+        rarity: Rarity,
+        base_atk: int,
+        base_def: int,
+        base_spd: int,
+        crit_rate: float,
+        crit_dmg: float,
+        basic: Ability,
+        skill: Ability,
+        ultimate: Ability,
+    ) -> None:
+        super().__init__(
+            name=name,
+            path=Path.REMEMBRANCE,
+            element=element,
+            rarity=rarity,
+            base_atk=base_atk,
+            base_def=base_def,
+            base_spd=base_spd,
+            crit_rate=crit_rate,
+            crit_dmg=crit_dmg,
+            basic=basic,
+            skill=skill,
+            ultimate=ultimate,
+        )
+
+
+class ElationCard(Card):
+    def __init__(
+        self,
+        name: str,
+        element: Element,
+        rarity: Rarity,
+        base_atk: int,
+        base_def: int,
+        base_spd: int,
+        crit_rate: float,
+        crit_dmg: float,
+        basic: Ability,
+        skill: Ability,
+        ultimate: Ability,
+    ) -> None:
+        super().__init__(
+            name=name,
+            path=Path.ELATION,
+            element=element,
+            rarity=rarity,
+            base_atk=base_atk,
+            base_def=base_def,
+            base_spd=base_spd,
+            crit_rate=crit_rate,
+            crit_dmg=crit_dmg,
+            basic=basic,
+            skill=skill,
+            ultimate=ultimate,
+        )

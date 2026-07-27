@@ -29,7 +29,7 @@ class Deckbuilding(commands.GroupCog, name="decks"):
         if uid not in self.game_data.users:
             self.game_data.add_user(uid)
             await interaction.followup.send(
-                "You don't own any cards yet, but your Durin TCG account has been created. Please use `/warp` or wait for `@axelotlramen` to implement this feature."
+                "You don't own any cards yet, but your Pearl TCG account has been created. Cards will be claimable soon."
             )
             return
 
@@ -61,7 +61,7 @@ class Deckbuilding(commands.GroupCog, name="decks"):
         if uid not in self.game_data.users:
             self.game_data.add_user(uid)
             await interaction.response.send_message(
-                "You don't own any cards yet, but your Durin TCG account has been created. Please use `/warp` to get some cards."
+                "You don't own any cards yet, but your Pearl TCG account has been created. Cards will be claimable soon."
             )
             return
 
