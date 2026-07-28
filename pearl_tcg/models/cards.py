@@ -9,9 +9,11 @@ if TYPE_CHECKING:
 
 
 class Ability:
-    def __init__(self, name: str, desc: str) -> None:
+    def __init__(self, name: str, desc: str, power: float, energy_gain: int = 20) -> None:
         self.name = name
         self.desc = desc
+        self.power = power
+        self.energy_gain = energy_gain
 
     def __repr__(self) -> str:
         return f"{self.name}: {self.desc}"
@@ -32,7 +34,10 @@ class Card:
         crit_dmg: float,
         basic: Ability,
         skill: Ability,
+        talent: Ability,
         ultimate: Ability,
+        energy_start: int = 50,
+        energy_max: int = 100,
     ) -> None:
         self.name = name
         self.element = element
@@ -44,7 +49,10 @@ class Card:
         self.crit_dmg = crit_dmg
         self.basic = basic
         self.skill = skill
+        self.talent = talent
         self.ultimate = ultimate
+        self.energy_start = energy_start
+        self.energy_max = energy_max
 
     def __repr__(self) -> str:
         return f"**{self.name}** ({self.path.value} - {self.element.value})"

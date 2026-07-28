@@ -6,6 +6,7 @@ from enum import StrEnum
 class CardAbility(StrEnum):
     BASIC = "Basic"
     SKILL = "Skill"
+    TALENT = "Talent"
     ULTIMATE = "Ultimate"
 
 
