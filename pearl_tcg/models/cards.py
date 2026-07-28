@@ -1,6 +1,11 @@
 from __future__ import annotations
 
-from pearl_tcg.enums import Element, Path, Rarity
+from typing import TYPE_CHECKING
+
+from pearl_tcg.enums import Path
+
+if TYPE_CHECKING:
+    from pearl_tcg.enums import Element, Rarity
 
 
 class Ability:
@@ -13,10 +18,11 @@ class Ability:
 
 
 class Card:
+    path: Path
+
     def __init__(
         self,
         name: str,
-        path: Path,
         element: Element,
         rarity: Rarity,
         base_atk: int,
@@ -29,7 +35,6 @@ class Card:
         ultimate: Ability,
     ) -> None:
         self.name = name
-        self.path = path
         self.element = element
         self.rarity = rarity
         self.base_atk = base_atk
@@ -49,279 +54,36 @@ class Card:
 
 
 class DestructionCard(Card):
-    def __init__(
-        self,
-        name: str,
-        element: Element,
-        rarity: Rarity,
-        base_atk: int,
-        base_def: int,
-        base_spd: int,
-        crit_rate: float,
-        crit_dmg: float,
-        basic: Ability,
-        skill: Ability,
-        ultimate: Ability,
-    ) -> None:
-        super().__init__(
-            name=name,
-            path=Path.DESTRUCTION,
-            element=element,
-            rarity=rarity,
-            base_atk=base_atk,
-            base_def=base_def,
-            base_spd=base_spd,
-            crit_rate=crit_rate,
-            crit_dmg=crit_dmg,
-            basic=basic,
-            skill=skill,
-            ultimate=ultimate,
-        )
+    path = Path.DESTRUCTION
 
 
 class HuntCard(Card):
-    def __init__(
-        self,
-        name: str,
-        element: Element,
-        rarity: Rarity,
-        base_atk: int,
-        base_def: int,
-        base_spd: int,
-        crit_rate: float,
-        crit_dmg: float,
-        basic: Ability,
-        skill: Ability,
-        ultimate: Ability,
-    ) -> None:
-        super().__init__(
-            name=name,
-            path=Path.HUNT,
-            element=element,
-            rarity=rarity,
-            base_atk=base_atk,
-            base_def=base_def,
-            base_spd=base_spd,
-            crit_rate=crit_rate,
-            crit_dmg=crit_dmg,
-            basic=basic,
-            skill=skill,
-            ultimate=ultimate,
-        )
+    path = Path.HUNT
 
 
 class EruditionCard(Card):
-    def __init__(
-        self,
-        name: str,
-        element: Element,
-        rarity: Rarity,
-        base_atk: int,
-        base_def: int,
-        base_spd: int,
-        crit_rate: float,
-        crit_dmg: float,
-        basic: Ability,
-        skill: Ability,
-        ultimate: Ability,
-    ) -> None:
-        super().__init__(
-            name=name,
-            path=Path.ERUDITION,
-            element=element,
-            rarity=rarity,
-            base_atk=base_atk,
-            base_def=base_def,
-            base_spd=base_spd,
-            crit_rate=crit_rate,
-            crit_dmg=crit_dmg,
-            basic=basic,
-            skill=skill,
-            ultimate=ultimate,
-        )
+    path = Path.ERUDITION
 
 
 class HarmonyCard(Card):
-    def __init__(
-        self,
-        name: str,
-        element: Element,
-        rarity: Rarity,
-        base_atk: int,
-        base_def: int,
-        base_spd: int,
-        crit_rate: float,
-        crit_dmg: float,
-        basic: Ability,
-        skill: Ability,
-        ultimate: Ability,
-    ) -> None:
-        super().__init__(
-            name=name,
-            path=Path.HARMONY,
-            element=element,
-            rarity=rarity,
-            base_atk=base_atk,
-            base_def=base_def,
-            base_spd=base_spd,
-            crit_rate=crit_rate,
-            crit_dmg=crit_dmg,
-            basic=basic,
-            skill=skill,
-            ultimate=ultimate,
-        )
+    path = Path.HARMONY
 
 
 class NihilityCard(Card):
-    def __init__(
-        self,
-        name: str,
-        element: Element,
-        rarity: Rarity,
-        base_atk: int,
-        base_def: int,
-        base_spd: int,
-        crit_rate: float,
-        crit_dmg: float,
-        basic: Ability,
-        skill: Ability,
-        ultimate: Ability,
-    ) -> None:
-        super().__init__(
-            name=name,
-            path=Path.NIHILITY,
-            element=element,
-            rarity=rarity,
-            base_atk=base_atk,
-            base_def=base_def,
-            base_spd=base_spd,
-            crit_rate=crit_rate,
-            crit_dmg=crit_dmg,
-            basic=basic,
-            skill=skill,
-            ultimate=ultimate,
-        )
+    path = Path.NIHILITY
 
 
 class PreservationCard(Card):
-    def __init__(
-        self,
-        name: str,
-        element: Element,
-        rarity: Rarity,
-        base_atk: int,
-        base_def: int,
-        base_spd: int,
-        crit_rate: float,
-        crit_dmg: float,
-        basic: Ability,
-        skill: Ability,
-        ultimate: Ability,
-    ) -> None:
-        super().__init__(
-            name=name,
-            path=Path.PRESERVATION,
-            element=element,
-            rarity=rarity,
-            base_atk=base_atk,
-            base_def=base_def,
-            base_spd=base_spd,
-            crit_rate=crit_rate,
-            crit_dmg=crit_dmg,
-            basic=basic,
-            skill=skill,
-            ultimate=ultimate,
-        )
+    path = Path.PRESERVATION
 
 
 class AbundanceCard(Card):
-    def __init__(
-        self,
-        name: str,
-        element: Element,
-        rarity: Rarity,
-        base_atk: int,
-        base_def: int,
-        base_spd: int,
-        crit_rate: float,
-        crit_dmg: float,
-        basic: Ability,
-        skill: Ability,
-        ultimate: Ability,
-    ) -> None:
-        super().__init__(
-            name=name,
-            path=Path.ABUNDANCE,
-            element=element,
-            rarity=rarity,
-            base_atk=base_atk,
-            base_def=base_def,
-            base_spd=base_spd,
-            crit_rate=crit_rate,
-            crit_dmg=crit_dmg,
-            basic=basic,
-            skill=skill,
-            ultimate=ultimate,
-        )
+    path = Path.ABUNDANCE
 
 
 class RemembranceCard(Card):
-    def __init__(
-        self,
-        name: str,
-        element: Element,
-        rarity: Rarity,
-        base_atk: int,
-        base_def: int,
-        base_spd: int,
-        crit_rate: float,
-        crit_dmg: float,
-        basic: Ability,
-        skill: Ability,
-        ultimate: Ability,
-    ) -> None:
-        super().__init__(
-            name=name,
-            path=Path.REMEMBRANCE,
-            element=element,
-            rarity=rarity,
-            base_atk=base_atk,
-            base_def=base_def,
-            base_spd=base_spd,
-            crit_rate=crit_rate,
-            crit_dmg=crit_dmg,
-            basic=basic,
-            skill=skill,
-            ultimate=ultimate,
-        )
+    path = Path.REMEMBRANCE
 
 
 class ElationCard(Card):
-    def __init__(
-        self,
-        name: str,
-        element: Element,
-        rarity: Rarity,
-        base_atk: int,
-        base_def: int,
-        base_spd: int,
-        crit_rate: float,
-        crit_dmg: float,
-        basic: Ability,
-        skill: Ability,
-        ultimate: Ability,
-    ) -> None:
-        super().__init__(
-            name=name,
-            path=Path.ELATION,
-            element=element,
-            rarity=rarity,
-            base_atk=base_atk,
-            base_def=base_def,
-            base_spd=base_spd,
-            crit_rate=crit_rate,
-            crit_dmg=crit_dmg,
-            basic=basic,
-            skill=skill,
-            ultimate=ultimate,
-        )
+    path = Path.ELATION

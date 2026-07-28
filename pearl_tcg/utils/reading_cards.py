@@ -9,18 +9,6 @@ from pearl_tcg.models.cards import Card
 
 CARD_ROOT = pathlib.Path(CONFIG.card_root)
 
-_PATH_BASE_CLASS_NAMES = {
-    "DestructionCard",
-    "HuntCard",
-    "EruditionCard",
-    "HarmonyCard",
-    "NihilityCard",
-    "PreservationCard",
-    "AbundanceCard",
-    "RemembranceCard",
-    "ElationCard",
-}
-
 
 def read_cards() -> dict[str, Card]:
     all_cards: dict[str, Card] = {}
@@ -39,14 +27,15 @@ def read_cards() -> dict[str, Card]:
             sys.modules[module_name] = module
             spec.loader.exec_module(module)
 
-            # Find the class that inherits from Card
+            # Find the class actually defined in this module (not merely imported into it)
+            # that inherits from Card - excludes Card itself and the Path-subclass bases,
+            # both of which are only ever imported here, never defined here.
             for attr_name in dir(module):
                 attr = getattr(module, attr_name)
                 if (
                     isinstance(attr, type)
                     and issubclass(attr, Card)
-                    and attr is not Card
-                    and attr.__name__ not in _PATH_BASE_CLASS_NAMES
+                    and attr.__module__ == module_name
                 ):
                     card_instance = attr()  # pyright: ignore[reportCallIssue]
                     all_cards[card_instance.name] = card_instance
