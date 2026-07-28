@@ -36,3 +36,10 @@ class Rarity(StrEnum):
     COMMON = "Common"
     RARE = "Rare"
     LEGENDARY = "Legendary"
+
+
+class AbilityType(StrEnum):
+    NONE = "None"
+    DEBUFF = "Debuff"
+    BUFF = "Buff"
+    SUMMON = "Summon"

@@ -1,29 +1,48 @@
 from __future__ import annotations
 
 import random
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
-from pearl_tcg.models.battle.deck import build_deck
+from pearl_tcg.enums import CardAbility
+from pearl_tcg.models.battle.combo_rules import ComboEffect
+from pearl_tcg.models.battle.deck import ActionCard, build_deck
 from pearl_tcg.models.battle.state import (
     DISCARDS_PER_ROUND,
     HAND_SIZE,
+    MAX_COMBO_SIZE,
     MAX_DISCARD_SWAP,
     PLAYS_PER_ROUND,
     ULTIMATE_POWER,
 )
+from pearl_tcg.utils.reading_combos import read_combos
 
 if TYPE_CHECKING:
     from pearl_tcg.models.battle.character import BattleCharacter
-    from pearl_tcg.models.battle.deck import ActionCard
+    from pearl_tcg.models.battle.combo_rules import ComboResolver
     from pearl_tcg.models.battle.state import Boss
 
-RESONANCE = 1.0  # flat for now - Path Resonance/combo bonuses are a later increment
+
+@dataclass(frozen=True)
+class PlayRecord:
+    """One `play()`/`use_ultimate()` call, structured for later study - the human-readable
+    `log` strings stay for display, this is for analysis (e.g. combo frequency, DMG-per-Play)."""
+
+    cards: list[ActionCard] = field(default_factory=list)
+    total_damage: int = 0
+    log_text: str = ""
 
 
 class BattleRound:
-    def __init__(self, roster: list[BattleCharacter], boss: Boss) -> None:
+    def __init__(
+        self,
+        roster: list[BattleCharacter],
+        boss: Boss,
+        combo_resolvers: list[ComboResolver] | None = None,
+    ) -> None:
         self.roster = roster
         self.boss = boss
+        self.combo_resolvers = combo_resolvers if combo_resolvers is not None else read_combos()
 
         self.deck: list[ActionCard] = build_deck(roster)
         self.discard_pile: list[ActionCard] = []
@@ -33,6 +52,7 @@ class BattleRound:
         self.discards_remaining = DISCARDS_PER_ROUND
         self.plays_remaining = PLAYS_PER_ROUND
         self.log: list[str] = []
+        self.play_history: list[PlayRecord] = []
 
         self._draw(HAND_SIZE)
 
@@ -75,29 +95,53 @@ class BattleRound:
         self.log.append(result)
         return result
 
-    def play(self, card: ActionCard) -> str:
+    def play(self, cards: list[ActionCard]) -> str:
         if self.plays_remaining <= 0:
             msg = "No plays remaining this round."
             raise ValueError(msg)
-        if card.sp_cost > self.sp:
-            msg = (
-                f"Not enough SP to play {card.ability.name} (needs {card.sp_cost}, have {self.sp})."
-            )
+        if not 1 <= len(cards) <= MAX_COMBO_SIZE:
+            msg = f"Must play between 1 and {MAX_COMBO_SIZE} cards."
             raise ValueError(msg)
 
-        self.hand.remove(card)
-        self.discard_pile.append(card)
+        running_sp = self.sp
+        for card in cards:
+            if card.sp_cost > running_sp:
+                msg = (
+                    f"Not enough SP to play {card.ability.name} "
+                    f"(needs {card.sp_cost}, have {running_sp} at that point in the combo)."
+                )
+                raise ValueError(msg)
+            running_sp += card.sp_generated - card.sp_cost
+
+        bonuses = self._resolve_combo_bonuses(cards)
+
+        hit_lines: list[str] = []
+        total_damage = 0
+        for card, bonus in zip(cards, bonuses, strict=True):
+            self.hand.remove(card)
+            self.discard_pile.append(card)
+            self.sp += card.sp_generated - card.sp_cost
+
+            character = card.owner
+            character.gain_energy(card.ability.energy_gain)
+
+            damage, is_crit = self._roll_damage(
+                character, card.ability.power, bonus.resonance_multiplier
+            )
+            self.boss.take_damage(damage)
+            total_damage += damage
+            hit_lines.append(self._log_hit(character.card.name, card.ability.name, damage, is_crit))
+
         self.plays_remaining -= 1
-        self.sp += card.sp_generated - card.sp_cost
 
-        character = card.owner
-        character.gain_energy(card.ability.energy_gain)
-
-        damage, is_crit = self._roll_damage(character, card.ability.power)
-        self.boss.take_damage(damage)
-
-        result = self._log_hit(character.card.name, card.ability.name, damage, is_crit)
+        combo_summary = (
+            f"Combo total: {total_damage} DMG. Boss HP: {self.boss.current_hp}/{self.boss.max_hp}"
+        )
+        result = "\n".join([*hit_lines, combo_summary])
         self.log.append(result)
+        self.play_history.append(
+            PlayRecord(cards=list(cards), total_damage=total_damage, log_text=result)
+        )
         return result
 
     def use_ultimate(self, character: BattleCharacter) -> str:
@@ -105,21 +149,38 @@ class BattleRound:
             msg = f"{character.card.name}'s Energy is not full."
             raise ValueError(msg)
 
-        damage, is_crit = self._roll_damage(character, ULTIMATE_POWER)
+        ultimate_card = ActionCard(character, character.card.ultimate, CardAbility.ULTIMATE)
+        bonus = self._resolve_combo_bonuses([ultimate_card])[0]
+
+        damage, is_crit = self._roll_damage(character, ULTIMATE_POWER, bonus.resonance_multiplier)
         character.consume_energy()
         self.boss.take_damage(damage)
 
         result = self._log_hit(
-            character.card.name, character.card.ultimate.name, damage, is_crit, ultimate=True
+            character.card.name, ultimate_card.ability.name, damage, is_crit, ultimate=True
         )
         self.log.append(result)
+        self.play_history.append(
+            PlayRecord(cards=[ultimate_card], total_damage=damage, log_text=result)
+        )
         return result
 
-    def _roll_damage(self, character: BattleCharacter, power: float) -> tuple[int, bool]:
+    def _resolve_combo_bonuses(self, cards: list[ActionCard]) -> list[ComboEffect]:
+        multipliers = [1.0] * len(cards)
+        for resolver in self.combo_resolvers:
+            contribution = resolver.resolve(cards, self.boss)
+            multipliers = [
+                a * b.resonance_multiplier for a, b in zip(multipliers, contribution, strict=True)
+            ]
+        return [ComboEffect(resonance_multiplier=multiplier) for multiplier in multipliers]
+
+    def _roll_damage(
+        self, character: BattleCharacter, power: float, resonance: float
+    ) -> tuple[int, bool]:
         base_damage = character.card.base_atk * power
         is_crit = random.random() < character.card.crit_rate
         multiplier = (1 + character.card.crit_dmg) if is_crit else 1
-        return round(base_damage * multiplier * RESONANCE), is_crit
+        return round(base_damage * multiplier * resonance), is_crit
 
     def _log_hit(
         self,

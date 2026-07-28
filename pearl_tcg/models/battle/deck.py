@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 import random
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
 from pearl_tcg.enums import CardAbility
 
 if TYPE_CHECKING:
     from pearl_tcg.models.battle.character import BattleCharacter
+    from pearl_tcg.models.battle.marks import Mark
     from pearl_tcg.models.cards import Ability
 
 BASIC_COPIES = 4
@@ -31,6 +32,9 @@ class ActionCard:
     owner: BattleCharacter
     ability: Ability
     slot: CardAbility
+    # Empty for every card today - scaffolding for future shop-purchased attachments
+    # (e.g. a Wildcard mark) rather than something anything currently populates.
+    marks: list[Mark] = field(default_factory=list)
 
     @property
     def sp_cost(self) -> int:

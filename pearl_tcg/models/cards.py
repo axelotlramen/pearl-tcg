@@ -2,18 +2,34 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from pearl_tcg.enums import Path
+from pearl_tcg.enums import AbilityType, Path
 
 if TYPE_CHECKING:
     from pearl_tcg.enums import Element, Rarity
 
 
 class Ability:
-    def __init__(self, name: str, desc: str, power: float, energy_gain: int = 20) -> None:
+    def __init__(
+        self,
+        name: str,
+        desc: str,
+        power: float,
+        energy_gain: int = 20,
+        type: AbilityType = AbilityType.NONE,  # noqa: A002
+        path: Path | None = None,
+        combo_tag: str = "",
+    ) -> None:
         self.name = name
         self.desc = desc
         self.power = power
         self.energy_gain = energy_gain
+        self.type = type
+        # None until Card.__init__ fills it in from the owning character's Path, unless a
+        # generic (non-character) card ever sets its own explicitly.
+        self.path = path
+        # Opaque to pearl_tcg on purpose - only pearl_tcg_assets' combo resolvers assign or
+        # interpret any meaning here, so no specific mechanic is named in the open-source repo.
+        self.combo_tag = combo_tag
 
     def __repr__(self) -> str:
         return f"{self.name}: {self.desc}"
@@ -53,6 +69,10 @@ class Card:
         self.ultimate = ultimate
         self.energy_start = energy_start
         self.energy_max = energy_max
+
+        for ability in (basic, skill, talent, ultimate):
+            if ability.path is None:
+                ability.path = self.path
 
     def __repr__(self) -> str:
         return f"**{self.name}** ({self.path.value} - {self.element.value})"
