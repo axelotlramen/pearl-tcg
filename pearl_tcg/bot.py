@@ -24,7 +24,6 @@ class PearlBot(commands.Bot):
     def __init__(self) -> None:
         super().__init__(command_prefix="a!", intents=discord.Intents.all(), help_command=None)
 
-        self.initialised = False
         self.logger = LOGGER
         self.game_data = GameData()
 
@@ -42,7 +41,7 @@ class PearlBot(commands.Bot):
     @tasks.loop(minutes=5.0)
     async def status_task(self) -> None:
         try:
-            song = "「アイドル」by YOASOBI"
+            song = "Interstellar Journey (Honkai: Star Rail Theme Song)"
             await self.change_presence(
                 activity=discord.Activity(type=discord.ActivityType.listening, name=song)
             )
@@ -71,22 +70,11 @@ class PearlBot(commands.Bot):
 
     async def on_command(self, ctx: Context) -> None:
         executed_command = ctx.command.qualified_name if ctx.command else "Unknown"
-        if ctx.guild is not None:
-            self.logger.info(
-                "Executed %s command in %s (ID: %s) by %s (ID: %s)",
-                executed_command,
-                ctx.guild.name,
-                ctx.guild.id,
-                ctx.author,
-                ctx.author.id,
-            )
-        else:
-            self.logger.info(
-                "Executed %s command by %s (ID: %s) in DMs",
-                executed_command,
-                ctx.author,
-                ctx.author.id,
-            )
-
-    async def on_command_error(self, _context: Context, error: Exception) -> None:
-        raise error
+        location = f"{ctx.guild.name} (ID: {ctx.guild.id})" if ctx.guild is not None else "DMs"
+        self.logger.info(
+            "Executed %s command in %s by %s (ID: %s)",
+            executed_command,
+            location,
+            ctx.author,
+            ctx.author.id,
+        )
