@@ -20,6 +20,7 @@ class Config(BaseSettings):
 
     # file routes
     user_data_file: str
+    guild_drop_state_file: str
     card_root: str
     combo_root: str
 

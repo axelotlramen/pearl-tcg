@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 from pearl_tcg.enums import AbilityType, Path
 
 if TYPE_CHECKING:
-    from pearl_tcg.enums import Element, Rarity
+    from pearl_tcg.enums import Element
 
 
 class Ability:
@@ -42,7 +42,6 @@ class Card:
         self,
         name: str,
         element: Element,
-        rarity: Rarity,
         base_atk: int,
         base_def: int,
         base_spd: int,
@@ -57,7 +56,6 @@ class Card:
     ) -> None:
         self.name = name
         self.element = element
-        self.rarity = rarity
         self.base_atk = base_atk
         self.base_def = base_def
         self.base_spd = base_spd
