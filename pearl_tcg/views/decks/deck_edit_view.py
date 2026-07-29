@@ -7,12 +7,39 @@ from discord import Interaction, SelectOption
 from discord.ui import Button, Modal, Select, TextInput, View
 
 from pearl_tcg.constants import EMBED_TIMEOUT
-from pearl_tcg.models.game_data import GameData
+from pearl_tcg.models.user import describe_deck
 from pearl_tcg.views.base import BaseView
 
 if TYPE_CHECKING:
     from pearl_tcg.models.game_data import GameData
+    from pearl_tcg.models.owned_card import OwnedCard
     from pearl_tcg.models.user import CardDeck
+
+MAX_SELECT_OPTIONS = 25
+
+
+def _build_options(cards: list[OwnedCard], selected_id: str | None) -> list[SelectOption]:
+    ranked = sorted(cards, key=lambda c: c.rarity, reverse=True)
+    if selected_id is not None and not any(
+        c.id == selected_id for c in ranked[:MAX_SELECT_OPTIONS]
+    ):
+        selected_card = next((c for c in ranked if c.id == selected_id), None)
+        if selected_card is not None:
+            ranked = [selected_card, *[c for c in ranked if c.id != selected_id]]
+
+    limited = ranked[:MAX_SELECT_OPTIONS]
+    if not limited:
+        return [SelectOption(label="No cards available", value="none")]
+
+    return [
+        SelectOption(
+            label=owned.character_name,
+            description=f"{owned.rarity}★ - {owned.condition.name.title()}",
+            value=owned.id,
+            default=(owned.id == selected_id),
+        )
+        for owned in limited
+    ]
 
 
 class EditDeckView(BaseView):
@@ -66,7 +93,7 @@ class SingleEditDeckView(View):
         self.deck = self.user.decks[deck_index]
 
         self.deck_name = self.deck.name
-        self.selected = self.deck.cards
+        self.selected: list[str] = list(self.deck.cards)
 
         self.character_selects: list[EditableCharacterSelect] = []
 
@@ -74,7 +101,7 @@ class SingleEditDeckView(View):
             select = EditableCharacterSelect(
                 index=i,
                 parent_view=self,
-                selected_char=self.deck.cards[i] if i < len(self.deck.cards) else None,
+                selected_instance_id=self.selected[i] if i < len(self.selected) else None,
             )
             self.character_selects.append(select)
             self.add_item(select)
@@ -83,32 +110,36 @@ class SingleEditDeckView(View):
         self.add_item(SaveChangesButton(parent_view=self))
         self.add_item(ResetChangesButton(parent_view=self))
 
-    def edit_selected_deck(self, new_character: str, index: int) -> None:
-        self.selected[index] = new_character
+    def edit_selected_deck(self, new_instance_id: str, index: int) -> None:
+        while len(self.selected) <= index:
+            self.selected.append("")
+        self.selected[index] = new_instance_id
+
+    def character_name_for(self, instance_id: str) -> str | None:
+        owned = self.game_data.get_owned_card(self.user_id, instance_id)
+        return owned.character_name if owned else None
 
 
 class EditableCharacterSelect(Select):
     def __init__(
-        self, index: int, parent_view: SingleEditDeckView, selected_char: str | None
+        self, index: int, parent_view: SingleEditDeckView, selected_instance_id: str | None
     ) -> None:
         self.index = index
         self.parent_view = parent_view
 
         user_cards = parent_view.user.owned_cards
-        selected = selected_char or (user_cards[0] if user_cards else "")
-
-        options = [
-            SelectOption(label=name, value=name, default=(name == selected)) for name in user_cards
-        ]
+        default_id = selected_instance_id or (user_cards[0].id if user_cards else None)
 
         super().__init__(
-            placeholder=f"Character {index + 1}", options=options, min_values=1, max_values=1
+            placeholder=f"Character {index + 1}",
+            options=_build_options(user_cards, default_id),
+            min_values=1,
+            max_values=1,
         )
 
     async def callback(self, interaction: Interaction) -> None:
         self.parent_view.edit_selected_deck(self.values[0], self.index)
         await interaction.response.defer()
-        # You could auto-update here if you want
 
 
 class ChangeDeckNameButton(Button):
@@ -156,15 +187,21 @@ class SaveChangesButton(Button):
             )
             return
 
-        selected_chars = self.parent_view.selected
+        selected_ids = self.parent_view.selected
+        character_names = [self.parent_view.character_name_for(iid) for iid in selected_ids]
 
-        if len(set(selected_chars)) < len(selected_chars):
+        if any(name is None for name in character_names):
+            await interaction.response.send_message(
+                "One of the selected cards is no longer in your collection.", ephemeral=True
+            )
+            return
+        if len(set(character_names)) < len(character_names):
             await interaction.response.send_message(
                 "A deck cannot contain duplicate characters.", ephemeral=True
             )
             return
 
-        self.parent_view.deck.cards = selected_chars
+        self.parent_view.deck.cards = selected_ids
         self.parent_view.deck.name = self.parent_view.deck_name
         self.parent_view.game_data.save_users()
 
@@ -175,8 +212,9 @@ class SaveChangesButton(Button):
             if isinstance(item, Button):
                 self.parent_view.remove_item(item)
 
+        description = describe_deck(self.parent_view.user, self.parent_view.deck)
         await interaction.response.edit_message(
-            content=f"Deck successfully updated to **{self.parent_view.deck.name}**: `{', '.join(selected_chars)}`",
+            content=f"Deck successfully updated to **{self.parent_view.deck.name}**: `{description}`",
             view=self.parent_view,
         )
         self.parent_view.stop()
@@ -199,15 +237,21 @@ class ResetChangesButton(Button):
             self.parent_view.remove_item(select)
 
         # Recreate selects from original deck
+        self.parent_view.selected = list(self.parent_view.deck.cards)
         self.parent_view.character_selects.clear()
         for i in range(4):
             select = EditableCharacterSelect(
-                index=i, parent_view=self.parent_view, selected_char=self.parent_view.deck.cards[i]
+                index=i,
+                parent_view=self.parent_view,
+                selected_instance_id=(
+                    self.parent_view.deck.cards[i] if i < len(self.parent_view.deck.cards) else None
+                ),
             )
             self.parent_view.character_selects.append(select)
             self.parent_view.add_item(select)
 
+        description = describe_deck(self.parent_view.user, self.parent_view.deck)
         await interaction.response.edit_message(
-            content=f"Changes reset to original deck **{self.parent_view.deck.name}**: `{', '.join(self.parent_view.deck.cards)}`",
+            content=f"Changes reset to original deck **{self.parent_view.deck.name}**: `{description}`",
             view=self.parent_view,
         )

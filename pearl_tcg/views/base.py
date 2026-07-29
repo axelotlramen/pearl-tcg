@@ -1,11 +1,9 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+import contextlib
 
+import discord
 from discord.ui import Button, Select, View
-
-if TYPE_CHECKING:
-    import discord
 
 
 class BaseView(View):
@@ -17,3 +15,7 @@ class BaseView(View):
         for child in self.children:
             if isinstance(child, (Button, Select)):
                 child.disabled = True
+
+        if self.message is not None:
+            with contextlib.suppress(discord.HTTPException):
+                await self.message.edit(view=self)
