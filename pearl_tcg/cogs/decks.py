@@ -6,6 +6,8 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
+from pearl_tcg.constants import NEW_ACCOUNT_MESSAGE
+from pearl_tcg.models.user import describe_deck
 from pearl_tcg.views.decks.deck_add_view import DeckAddView
 from pearl_tcg.views.decks.deck_delete_view import DeleteDeckView
 from pearl_tcg.views.decks.deck_edit_view import EditDeckView
@@ -15,7 +17,7 @@ if TYPE_CHECKING:
     from pearl_tcg.models.game_data import GameData
 
 
-class Deckbuilding(commands.GroupCog, name="decks"):
+class Decks(commands.GroupCog, name="decks"):
     def __init__(self, bot: PearlBot, game_data: GameData) -> None:
         self.bot = bot
         self.game_data = game_data
@@ -25,15 +27,11 @@ class Deckbuilding(commands.GroupCog, name="decks"):
         await interaction.response.defer()
 
         uid = str(interaction.user.id)
+        user, is_new = self.game_data.get_or_create_user(uid)
 
-        if uid not in self.game_data.users:
-            self.game_data.add_user(uid)
-            await interaction.followup.send(
-                "You don't own any cards yet, but your Pearl TCG account has been created. Cards will be claimable soon."
-            )
+        if is_new:
+            await interaction.followup.send(NEW_ACCOUNT_MESSAGE)
             return
-
-        user = self.game_data.get_user(uid)
 
         if not user.decks:
             await interaction.followup.send(
@@ -48,7 +46,7 @@ class Deckbuilding(commands.GroupCog, name="decks"):
         for deck_num, deck in enumerate(user.decks):
             embed.add_field(
                 name=f"Deck {deck_num + 1}: {deck.name}",
-                value=f"`{', '.join(deck.cards)}`",
+                value=f"`{describe_deck(user, deck)}`",
                 inline=False,
             )
 
@@ -57,25 +55,22 @@ class Deckbuilding(commands.GroupCog, name="decks"):
     @app_commands.command(name="add", description="List all available cards.")
     async def add_deck(self, interaction: discord.Interaction) -> None:
         uid = str(interaction.user.id)
+        user, is_new = self.game_data.get_or_create_user(uid)
 
-        if uid not in self.game_data.users:
-            self.game_data.add_user(uid)
-            await interaction.response.send_message(
-                "You don't own any cards yet, but your Pearl TCG account has been created. Cards will be claimable soon."
-            )
+        if is_new:
+            await interaction.response.send_message(NEW_ACCOUNT_MESSAGE)
             return
-
-        user = self.game_data.get_user(uid)
 
         if len(user.decks) >= 10:
             await interaction.response.send_message("You already have the maximum of 10 decks.")
             return
 
         user_cards = user.owned_cards
+        distinct_characters = {owned.character_name for owned in user_cards}
 
-        if len(user_cards) < 4:
+        if len(distinct_characters) < 4:
             await interaction.response.send_message(
-                "You do not have enough cards (4+) to form a deck."
+                "You do not have enough distinct characters (4+) to form a deck."
             )
             return
 
@@ -114,4 +109,4 @@ class Deckbuilding(commands.GroupCog, name="decks"):
 
 
 async def setup(bot: PearlBot) -> None:
-    await bot.add_cog(Deckbuilding(bot, bot.game_data))
+    await bot.add_cog(Decks(bot, bot.game_data))
